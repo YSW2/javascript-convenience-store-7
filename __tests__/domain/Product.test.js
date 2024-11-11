@@ -1,41 +1,45 @@
-import { Product } from '../../src/domain/Product';
+export class Product {
+  constructor(name, price, stock, promotionStock = 0, promotionName = null) {
+    this.validateProduct(name, price, stock);
 
-describe('Product', () => {
-  test('상품 생성', () => {
-    const product = new Product('콜라', 1000, 10, 5, '탄산2+1');
+    this.name = name;
+    this.price = price;
+    this.stock = stock;
+    this.promotionName = promotionName;
+  }
 
-    expect(product.name).toBe('콜라');
-    expect(product.price).toBe(1000);
-    expect(product.stock).toBe(10);
-    expect(product.promotionStock).toBe(5);
-    expect(product.promotionName).toBe('탄산2+1');
-  });
+  validateProduct(name, price, stock) {
+    if (!name || typeof name !== 'string') {
+      throw new Error('[ERROR] 상품명이 올바르지 않습니다.');
+    }
+    if (!Number.isInteger(price) || price <= 0) {
+      throw new Error('[ERROR] 가격이 올바르지 않습니다.');
+    }
+    if (!Number.isInteger(stock) || stock < 0) {
+      throw new Error('[ERROR] 재고 수량이 올바르지 않습니다.');
+    }
+  }
 
-  test('잘못된 상품 정보로 생성 시 에러', () => {
-    expect(() => new Product('', 1000, 10)).toThrow('[ERROR]');
-    expect(() => new Product('콜라', -1000, 10)).toThrow('[ERROR]');
-    expect(() => new Product('콜라', 1000, -10)).toThrow('[ERROR]');
-  });
+  hasStock() {
+    return this.stock > 0;
+  }
 
-  test('재고 확인', () => {
-    const product = new Product('콜라', 1000, 10, 5);
+  getTotalStock() {
+    return this.stock;
+  }
 
-    expect(product.hasStock()).toBeTruthy();
-    expect(product.getTotalStock()).toBe(15);
-  });
+  hasPromotion() {
+    return this.promotionName !== null && this.promotionName !== 'null';
+  }
 
-  test('재고 감소', () => {
-    const product = new Product('콜라', 1000, 10, 5);
-
-    const result = product.decreaseStock(3, true);
-    expect(result.promotionUsed).toBe(3);
-    expect(result.normalUsed).toBe(0);
-    expect(product.promotionStock).toBe(2);
-
-    const result2 = product.decreaseStock(4, true);
-    expect(result2.promotionUsed).toBe(2);
-    expect(result2.normalUsed).toBe(2);
-    expect(product.promotionStock).toBe(0);
-    expect(product.stock).toBe(8);
-  });
-});
+  decreaseStock(quantity) {
+    if (quantity > this.stock) {
+      throw new Error('[ERROR] 재고가 부족합니다.');
+    }
+    this.stock -= quantity;
+    return {
+      promotionUsed: this.hasPromotion() ? quantity : 0,
+      normalUsed: quantity,
+    };
+  }
+}

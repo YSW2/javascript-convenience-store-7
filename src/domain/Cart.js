@@ -40,7 +40,6 @@ export class Cart {
           stockResult.promotionUsed,
           promotion
         );
-
         if (freeQuantity > 0) {
           this.freeItems.set(
             name,

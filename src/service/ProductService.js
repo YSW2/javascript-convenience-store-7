@@ -1,4 +1,3 @@
-import path from 'path';
 import { Cart } from '../domain/Cart.js';
 import { FileReader } from '../utils/FileReader.js';
 import { Product } from '../domain/Product.js';
@@ -6,8 +5,8 @@ import { Promotion } from '../domain/Promotion.js';
 
 export class ProductService {
   constructor() {
-    this.products = new Map(); // Map<상품명, Product>
-    this.promotions = new Map(); // Map<프로모션명, Promotion>
+    this.products = [];
+    this.promotions = new Map();
     this.cart = new Cart();
   }
 
@@ -18,16 +17,10 @@ export class ProductService {
 
   async loadProducts() {
     const productData = await FileReader.readProducts('./public/products.md');
-    productData.forEach((data) => {
-      const product = new Product(
-        data.name,
-        data.price,
-        data.stock,
-        data.promotionStock,
-        data.promotionName
-      );
-      this.products.set(data.name, product);
-    });
+    this.products = productData.map(
+      (data) =>
+        new Product(data.name, data.price, data.stock, 0, data.promotion)
+    );
   }
 
   async loadPromotions() {
@@ -58,16 +51,32 @@ export class ProductService {
     const items = input.match(/\[([^\]]+)\]/g);
     return items.map((item) => {
       const [name, quantity] = item.slice(1, -1).split('-');
-      if (!this.products.has(name)) {
+      const product = this.findProduct(name);
+
+      if (!product) {
         throw new Error(
           '[ERROR] 존재하지 않는 상품입니다. 다시 입력해 주세요.'
         );
       }
+
       return {
-        product: this.products.get(name),
+        product,
         quantity: parseInt(quantity),
       };
     });
+  }
+
+  findProduct(name) {
+    const promotionProduct = this.products.find(
+      (p) => p.name === name && p.hasPromotion()
+    );
+    if (promotionProduct && promotionProduct.hasStock()) {
+      return promotionProduct;
+    }
+
+    return this.products.find(
+      (p) => p.name === name && !p.hasPromotion() && p.hasStock()
+    );
   }
 
   addToCart(purchaseInput) {
@@ -125,12 +134,22 @@ export class ProductService {
   }
 
   getProductList() {
-    return Array.from(this.products.values()).map((product) => ({
-      name: product.name,
-      price: product.price,
-      stock: product.getTotalStock(),
-      promotionName: product.promotionName,
-    }));
+    // 상품명 기준으로 재고를 합산하여 출력
+    const productMap = new Map();
+
+    this.products.forEach((product) => {
+      const key = `${product.name}-${product.promotionName || 'normal'}`;
+      if (!productMap.has(key)) {
+        productMap.set(key, {
+          name: product.name,
+          price: product.price,
+          stock: product.stock,
+          promotionName: product.promotionName,
+        });
+      }
+    });
+
+    return Array.from(productMap.values());
   }
 
   getCartSummary() {
