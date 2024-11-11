@@ -1,7 +1,7 @@
-import { Cart } from './Cart.js';
-import { FileReader } from './FileReader.js';
-import { Product } from './Product.js';
-import { Promotion } from './Promotion.js';
+import { Cart } from '../domain/Cart.js';
+import { FileReader } from '../utils/FileReader.js';
+import { Product } from '../domain/Product.js';
+import { Promotion } from '../domain/Promotion.js';
 
 class ProductService {
   constructor() {
