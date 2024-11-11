@@ -27,9 +27,8 @@ export class Promotion {
     return date instanceof Date && !isNaN(date);
   }
 
-  isActive() {
-    const now = DateTimes.now();
-    return now >= this.startDate && now <= this.endDate;
+  isActive(currentDate = new Date()) {
+    return currentDate >= this.startDate && currentDate <= this.endDate;
   }
 
   calculateFreeItems(quantity) {

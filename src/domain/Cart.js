@@ -1,18 +1,20 @@
 export class Cart {
   constructor() {
-    this.items = new Map(); // Map<상품명, {product: Product, quantity: number}>
-    this.freeItems = new Map(); // Map<상품명, number>
+    this.items = [];
+    this.freeItems = [];
   }
 
   addItem(product, quantity) {
     this.validateQuantity(quantity);
-    this.validateStock(product, quantity);
 
-    const currentQuantity = this.items.get(product.name)?.quantity || 0;
-    this.items.set(product.name, {
-      product,
-      quantity: currentQuantity + quantity,
-    });
+    const existingItem = this.items.find(
+      (item) => item.product.name === product.name
+    );
+    if (existingItem) {
+      existingItem.quantity += quantity;
+    } else {
+      this.items.push({ product, quantity });
+    }
   }
 
   validateQuantity(quantity) {
@@ -21,30 +23,35 @@ export class Cart {
     }
   }
 
-  validateStock(product, quantity) {
-    if (quantity > product.getTotalStock()) {
-      throw new Error('[ERROR] 재고가 부족합니다.');
-    }
-  }
-
-  applyPromotions() {
-    for (const [name, item] of this.items) {
+  applyPromotions(promotions, currentDate) {
+    for (const item of this.items) {
       const { product, quantity } = item;
 
-      if (!product.hasPromotion() || !product.hasPromotionStock()) continue;
+      if (!product.hasPromotion()) continue;
+
+      const promotion = promotions.get(product.promotionName);
+      if (!promotion?.isActive(currentDate)) continue;
 
       const stockResult = product.decreaseStock(quantity, true);
       if (stockResult.promotionUsed > 0) {
-        const promotion = product.promotionName.includes('2+1') ? '2+1' : '1+1';
+        const promotionType = product.promotionName.includes('2+1')
+          ? '2+1'
+          : '1+1';
         const freeQuantity = this.calculateFreeQuantity(
           stockResult.promotionUsed,
-          promotion
+          promotionType
         );
+
         if (freeQuantity > 0) {
-          this.freeItems.set(
-            name,
-            (this.freeItems.get(name) || 0) + freeQuantity
+          const existingFreeItem = this.freeItems.find(
+            (freeItem) => freeItem.product.name === product.name
           );
+
+          if (existingFreeItem) {
+            existingFreeItem.quantity += freeQuantity;
+          } else {
+            this.freeItems.push({ product, quantity: freeQuantity });
+          }
         }
       }
     }
@@ -55,45 +62,38 @@ export class Cart {
       return Math.floor(quantity / 2);
     }
     if (promotionType === '2+1') {
-      return Math.floor(quantity / 3);
+      const groups = Math.floor(quantity / 2);
+      return groups;
     }
     return 0;
   }
 
   getTotalPrice() {
-    let total = 0;
-    for (const { product, quantity } of this.items.values()) {
-      total += product.price * quantity;
-    }
-    return total;
+    return this.items.reduce((total, { product, quantity }) => {
+      return total + product.price * quantity;
+    }, 0);
   }
 
   getPromotionDiscount() {
-    let discount = 0;
-    for (const [name, freeQuantity] of this.freeItems) {
-      const product = this.items.get(name).product;
-      discount += product.price * freeQuantity;
-    }
-    return discount;
+    return this.freeItems.reduce((discount, { product, quantity }) => {
+      return discount + product.price * quantity;
+    }, 0);
   }
 
   clear() {
-    this.items.clear();
-    this.freeItems.clear();
+    this.items = [];
+    this.freeItems = [];
   }
 
   isEmpty() {
-    return this.items.size === 0;
+    return this.items.length === 0;
   }
 
   getItems() {
-    return Array.from(this.items.values());
+    return this.items;
   }
 
   getFreeItems() {
-    return Array.from(this.freeItems.entries()).map(([name, quantity]) => ({
-      product: this.items.get(name).product,
-      quantity,
-    }));
+    return this.freeItems;
   }
 }

@@ -19,7 +19,13 @@ export class ProductService {
     const productData = await FileReader.readProducts('./public/products.md');
     this.products = productData.map(
       (data) =>
-        new Product(data.name, data.price, data.stock, 0, data.promotion)
+        new Product(
+          data.name,
+          data.price,
+          data.quantity,
+          data.promotionName ? data.quantity : 0, // promotionStock 설정 수정
+          data.promotionName
+        )
     );
   }
 
@@ -59,6 +65,13 @@ export class ProductService {
         );
       }
 
+      const parsedQuantity = parseInt(quantity);
+      if (parsedQuantity > product.getTotalStock()) {
+        throw new Error(
+          '[ERROR] 재고 수량을 초과하여 구매할 수 없습니다. 다시 입력해 주세요.'
+        );
+      }
+
       return {
         product,
         quantity: parseInt(quantity),
@@ -89,7 +102,8 @@ export class ProductService {
   }
 
   applyPromotions() {
-    this.cart.applyPromotions();
+    const currentDate = new Date('2024-02-01');
+    this.cart.applyPromotions(this.promotions, currentDate);
   }
 
   getAvailablePromotionSuggestions() {
@@ -134,22 +148,21 @@ export class ProductService {
   }
 
   getProductList() {
-    // 상품명 기준으로 재고를 합산하여 출력
-    const productMap = new Map();
-
-    this.products.forEach((product) => {
-      const key = `${product.name}-${product.promotionName || 'normal'}`;
-      if (!productMap.has(key)) {
-        productMap.set(key, {
-          name: product.name,
-          price: product.price,
-          stock: product.stock,
-          promotionName: product.promotionName,
-        });
-      }
-    });
-
-    return Array.from(productMap.values());
+    return this.products
+      .map((product) => ({
+        name: product.name,
+        price: product.price,
+        stock: product.stock === 0 ? '재고 없음' : `${product.stock}개`,
+        promotionName: product.promotionName,
+      }))
+      .map((item) => {
+        const price = item.price.toLocaleString();
+        const promotion =
+          item.promotionName && item.promotionName !== 'null'
+            ? ` ${item.promotionName}`
+            : '';
+        return `- ${item.name} ${price}원 ${item.stock}${promotion}`;
+      });
   }
 
   getCartSummary() {

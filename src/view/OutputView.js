@@ -8,17 +8,7 @@ export class OutputView {
   static printProducts(products) {
     Console.print('\n현재 보유하고 있는 상품입니다.\n');
     products.forEach((product) => {
-      const stockInfo =
-        product.stock === 0 ? '재고 없음' : `${product.stock}개`;
-      const promotionInfo = product.promotionName
-        ? ` ${product.promotionName}`
-        : '';
-
-      Console.print(
-        `- ${
-          product.name
-        } ${product.price.toLocaleString()}원 ${stockInfo}${promotionInfo}`
-      );
+      Console.print(product);
     });
   }
 

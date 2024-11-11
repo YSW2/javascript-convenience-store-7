@@ -9,17 +9,15 @@ export class FileReader {
       const [header, ...dataLines] = lines;
 
       return dataLines.map((line) => {
-        const [name, price, quantity, promotion = null] = line
+        const [name, price, quantity, promotion] = line
           .split(',')
           .map((item) => item.trim());
 
-        const hasPromotion = promotion !== 'null' && promotion !== null;
         return {
           name,
           price: parseInt(price),
-          stock: parseInt(quantity),
-          promotionStock: hasPromotion ? parseInt(quantity) : 0, // promotion이 있으면 전체 수량을 프로모션 재고로
-          promotionName: hasPromotion ? promotion : null,
+          quantity: parseInt(quantity),
+          promotionName: promotion === 'null' || !promotion ? null : promotion,
         };
       });
     } catch (error) {
