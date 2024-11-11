@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-class FileReader {
+export class FileReader {
   static async readProducts(filePath) {
     try {
       const content = await fs.readFile(filePath, 'utf8');
@@ -38,4 +38,3 @@ class FileReader {
     }
   }
 }
-export default FileReader;

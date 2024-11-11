@@ -1,6 +1,6 @@
 import { Console } from '@woowacourse/mission-utils';
 
-class OutputView {
+export class OutputView {
   static printWelcome() {
     Console.print('안녕하세요. W편의점입니다.');
   }
@@ -88,4 +88,3 @@ class OutputView {
     Console.print(message);
   }
 }
-export default OutputView;

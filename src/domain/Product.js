@@ -1,4 +1,4 @@
-class Product {
+export class Product {
   constructor(name, price, stock, promotionStock = 0, promotionName = null) {
     this.validateProduct(name, price, stock, promotionStock);
 
@@ -69,5 +69,3 @@ class Product {
     return quantity;
   }
 }
-
-export default Product;

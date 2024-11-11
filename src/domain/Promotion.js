@@ -1,6 +1,6 @@
 import { DateTimes } from '@woowacourse/mission-utils';
 
-class Promotion {
+export class Promotion {
   constructor(name, type, startDate, endDate) {
     this.validatePromotion(name, type, startDate, endDate);
 
@@ -44,5 +44,3 @@ class Promotion {
     return 0;
   }
 }
-
-export default Promotion;

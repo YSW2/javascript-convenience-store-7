@@ -1,4 +1,4 @@
-class Cart {
+export class Cart {
   constructor() {
     this.items = new Map(); // Map<상품명, {product: Product, quantity: number}>
     this.freeItems = new Map(); // Map<상품명, number>
@@ -98,4 +98,3 @@ class Cart {
     }));
   }
 }
-export default Cart;

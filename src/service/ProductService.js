@@ -3,7 +3,7 @@ import { FileReader } from '../utils/FileReader.js';
 import { Product } from '../domain/Product.js';
 import { Promotion } from '../domain/Promotion.js';
 
-class ProductService {
+export class ProductService {
   constructor() {
     this.products = new Map(); // Map<상품명, Product>
     this.promotions = new Map(); // Map<프로모션명, Promotion>
@@ -145,4 +145,3 @@ class ProductService {
     this.cart.clear();
   }
 }
-export default ProductService;
