@@ -16,7 +16,9 @@ export class ProductService {
   }
 
   async loadProducts() {
-    const productData = await FileReader.readProducts('../public/products.md');
+    const productData = await FileReader.readProducts(
+      '../../public/products.md'
+    );
     productData.forEach((data) => {
       const product = new Product(
         data.name,
@@ -31,7 +33,7 @@ export class ProductService {
 
   async loadPromotions() {
     const promotionData = await FileReader.readPromotions(
-      './public/promotions.md'
+      '../../public/promotions.md'
     );
     promotionData.forEach((data) => {
       const promotion = new Promotion(
