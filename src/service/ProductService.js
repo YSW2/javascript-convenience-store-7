@@ -3,17 +3,12 @@ import { Cart } from '../domain/Cart.js';
 import { FileReader } from '../utils/FileReader.js';
 import { Product } from '../domain/Product.js';
 import { Promotion } from '../domain/Promotion.js';
-import { fileURLToPath } from 'url';
 
 export class ProductService {
   constructor() {
     this.products = new Map(); // Map<상품명, Product>
     this.promotions = new Map(); // Map<프로모션명, Promotion>
     this.cart = new Cart();
-
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    this.productsPath = path.join(__dirname, '../../public/products.md');
-    this.promotionsPath = path.join(__dirname, '../../public/promotions.md');
   }
 
   async initialize() {
@@ -22,7 +17,7 @@ export class ProductService {
   }
 
   async loadProducts() {
-    const productData = await FileReader.readProducts(this.productsPath);
+    const productData = await FileReader.readProducts('./public/products.md');
     productData.forEach((data) => {
       const product = new Product(
         data.name,
@@ -36,7 +31,9 @@ export class ProductService {
   }
 
   async loadPromotions() {
-    const promotionData = await FileReader.readPromotions(this.promotionsPath);
+    const promotionData = await FileReader.readPromotions(
+      './public/promotions.md'
+    );
     promotionData.forEach((data) => {
       const promotion = new Promotion(
         data.name,

@@ -1,5 +1,5 @@
-import { ProductService } from '../../src/service/ProductService.js';
-import { jest } from '@jest/globals';
+const { ProductService } = require('../../service/ProductService');
+const { jest } = require('@jest/globals');
 
 describe('ProductService', () => {
   let productService;
